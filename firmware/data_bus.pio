@@ -24,7 +24,7 @@ wait2:
     mov x, isr
     jmp !x wait2
 
-.program output_enable_buffer
+.program output_enable_passthrough
 
 .wrap_target
 start:
@@ -56,11 +56,4 @@ wait_clear:
     mov osr, pins
     out x, 2
     jmp !x wait_clear
-.wrap
-
-
-.program tca5405
-
-.wrap_target
-    out pins, 1
 .wrap

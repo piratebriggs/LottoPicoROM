@@ -1,16 +1,35 @@
-# PicoROM
-PicoROM is an 8-bit ROM emulator in a DIP-32 compatible form factor. It's main use case (the reason I made it) is for rapid iteration when experimenting with arcade hardware. The PicoROM can emulate ROMs up to 2MBit (256Kbytes) in size and speeds of 100ns. 
+# My Fork of the PicoROM project
 
-![The PicoROM in use](docs/in_use.jpg)
+
 
 ## Hardware
-The PicoROM is based around the Raspberry Pi [RP2040](https://www.raspberrypi.com/products/rp2040/) microcontroller. A vertically mounted USB-C connector is used for power and communication with the host PC. The vertical orientation might seem awkward, but it ensures that all the hardware stays within the DIP-32 form factor and won't interfere with any adjacent hardware.
+The PicoROM is based around the Raspberry Pi [RP2040](https://www.raspberrypi.com/products/rp2040/) microcontroller on a custom PCB.
 
-The pinout used is compatible with a 27C020 EPROM, which I believe follows a JEDEC standard and is common to a lot of ROM and RAM ICs.
+It has access to all 29 PIO pins and has the following pin mapping:
+|pins|func|
+|-|-|
+|0-17|Addr|
+|18|LED|
+|19|Buf OE|
+|20|OE|
+|21|CE|
+|22-29|Data|
 
-![PCB Layout](docs/pcb_small.png)
+I'm futzing around with a Pi Pico on a breakboard which only has access to 26 PIO pins plus I've got slightly different design goals:
+- The RP2040 should provide 256 bytes of boot rom on reset. This should be enough to load a larger OS (CP/M etc.) from a CH376
+- After boot, the RP2040 ROM should not be present on the Z80 bus and instead passthrough the CE signal to a SRAM chip that is wired in parallel.
 
-KiCad project files are located in the `hardware/` directory.
+My Pinout is something like:
+
+|pins|func|
+|-|-|
+|0-7|Addr|
+|8|SRAM CE|
+|20|OE (RD_)|
+|21|CE (MEMREQ_)|
+|11-18|Data|
+|25|LED|
+
 
 ## Firmware
 The firmware is written in C/C++ using the [Pico C SDK](https://www.raspberrypi.com/documentation/pico-sdk/). The firmware is responsible for the ROM emulation, managing communication with the host PC and facilitating communication between the host PC and the target device.

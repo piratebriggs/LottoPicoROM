@@ -41,7 +41,6 @@ void rom_init_programs()
     uint sm_oe = pio_claim_unused_sm(data_pio, true);
     
     sm_report = pio_claim_unused_sm(data_pio, true);
-    sm_tca = pio_claim_unused_sm(data_pio, true);
 
     // Assign data and oe pins to pio
     for( uint ofs = 0; ofs < N_DATA_PINS; ofs++ )
@@ -62,13 +61,6 @@ void rom_init_programs()
         gpio_set_input_enabled(BASE_BUF_OE_PIN + ofs, false);
     }
 
-#if TCA_EXPANDER
-    pio_gpio_init(data_pio, TCA_EXPANDER_PIN);
-    gpio_set_input_enabled(TCA_EXPANDER_PIN, false);
-#endif // TCA_EXPANDER
-
-    pio_sm_set_consecutive_pindirs(data_pio, sm_data, BASE_DATA_PIN, N_DATA_PINS, true);
-
     // set out/in bases
     uint offset_data = pio_add_program(data_pio, &output_program);
     pio_sm_config c_data = output_program_get_default_config(offset_data);
@@ -82,10 +74,10 @@ void rom_init_programs()
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_OE_PIN, N_OE_PINS, false);
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_BUF_OE_PIN, N_BUF_OE_PINS, true);
 
-    uint offset_oe = pio_add_program(data_pio, &output_enable_buffer_program);
-    pio_sm_config c_oe = output_enable_buffer_program_get_default_config(offset_oe);
+    uint offset_oe = pio_add_program(data_pio, &output_enable_program);
+    pio_sm_config c_oe = output_enable_program_get_default_config(offset_oe);
     sm_config_set_in_pins(&c_oe, BASE_OE_PIN);
-    sm_config_set_set_pins(&c_oe, BASE_BUF_OE_PIN, N_BUF_OE_PINS);
+    sm_config_set_out_pins(&c_oe, BASE_DATA_PIN, N_DATA_PINS);
 
     pio_sm_init(data_pio, sm_oe, offset_oe, &c_oe);
     pio_sm_set_enabled(data_pio, sm_oe, true);
@@ -99,23 +91,6 @@ void rom_init_programs()
 
     pio_sm_init(data_pio, sm_report, offset_report, &c_report);
     pio_sm_set_enabled(data_pio, sm_report, true);
-
-#if TCA_EXPANDER
-    pio_sm_set_consecutive_pindirs(data_pio, sm_tca, TCA_EXPANDER_PIN, 1, true);
-    pio_sm_set_pins_with_mask(data_pio, sm_tca, 0xffffffff, 1 << TCA_EXPANDER_PIN);
-
-    uint offset_tca = pio_add_program(data_pio, &tca5405_program);
-    pio_sm_config c_tca = tca5405_program_get_default_config(offset_tca);
-    sm_config_set_out_pins(&c_tca, TCA_EXPANDER_PIN, 1);
-    sm_config_set_clkdiv(&c_tca, 1000);
-    sm_config_set_out_shift(&c_tca, true, true, 10); // 4-bits of preample, 5-bits of data, 1-end bit 
-
-    pio_sm_init(data_pio, sm_tca, offset_tca, &c_tca);
-    pio_sm_set_enabled(data_pio, sm_tca, true);
-
-    tca_set_pins(0x00);
-    tca_set_pins(0x00);
-#endif // TCA_EXPANDER
 }
 
 uint8_t *rom_get_buffer()
