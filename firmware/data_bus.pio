@@ -25,19 +25,19 @@ wait2:
     jmp wait2
 
 .program output_enable_passthrough
-    set y, 0b10    ; pin mask to match (CE Low, RomEn High)
 
 .wrap_target
 start:
     mov osr, pins
     out x, 2
-    jmp x!=y dis_out
+    jmp !x en_out ; if ROM_EN = low and CE = Low, set SRAM_CE low
 
+dis_out:
+    set pins, 1
+    jmp start
 en_out:
     set pins, 0
     jmp start
-dis_out:
-    set pins, 1
 .wrap
 
 .program output_enable_report

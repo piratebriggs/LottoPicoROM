@@ -39,6 +39,7 @@ void rom_init_programs()
 {
     uint sm_data = pio_claim_unused_sm(data_pio, true);
     uint sm_oe = pio_claim_unused_sm(data_pio, true);
+    uint sm_pt = pio_claim_unused_sm(data_pio, true);
     
     sm_report = pio_claim_unused_sm(data_pio, true);
 
@@ -74,6 +75,7 @@ void rom_init_programs()
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_OE_PIN, N_OE_PINS, false);
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS, true);
 
+    // program output_enable
     uint offset_oe = pio_add_program(data_pio, &output_enable_program);
     pio_sm_config c_oe = output_enable_program_get_default_config(offset_oe);
     sm_config_set_in_pins(&c_oe, BASE_OE_PIN);
@@ -82,6 +84,18 @@ void rom_init_programs()
     pio_sm_init(data_pio, sm_oe, offset_oe, &c_oe);
     pio_sm_set_enabled(data_pio, sm_oe, true);
 
+
+    // program output_enable_passthrough
+    uint offset_pt = pio_add_program(data_pio, &output_enable_passthrough_program);
+    pio_sm_config c_pt = output_enable_program_get_default_config(offset_pt);
+    sm_config_set_in_pins(&c_pt, BASE_OE_PIN+1);    // CE is 1 higher than OE
+    sm_config_set_set_pins(&c_pt, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS);
+
+    pio_sm_init(data_pio, sm_pt, offset_pt, &c_pt);
+    pio_sm_set_enabled(data_pio, sm_pt, true);
+
+
+    // program output_enable_report
     uint offset_report = pio_add_program(data_pio, &output_enable_report_program);
     pio_sm_config c_report = output_enable_report_program_get_default_config(offset_report);
     sm_config_set_in_pins(&c_report, BASE_OE_PIN);
