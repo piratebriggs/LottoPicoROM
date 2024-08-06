@@ -44,22 +44,18 @@ void rom_init_programs()
     sm_tca = pio_claim_unused_sm(data_pio, true);
 
     // Assign data and oe pins to pio
-
-    // Data pins
     for( uint ofs = 0; ofs < N_DATA_PINS; ofs++ )
     {
         pio_gpio_init(data_pio, BASE_DATA_PIN + ofs);
         gpio_set_input_enabled(BASE_DATA_PIN + ofs, false);
     }
 
-    // OE & CE input
     for( uint ofs = 0; ofs < N_OE_PINS; ofs++ )
     {
         pio_gpio_init(data_pio, BASE_OE_PIN + ofs);
         gpio_set_pulls(BASE_OE_PIN + ofs, true, false);
     }
 
-    // OE_BUF Output
     for( uint ofs = 0; ofs < N_BUF_OE_PINS; ofs++ )
     {
         pio_gpio_init(data_pio, BASE_BUF_OE_PIN + ofs);
@@ -74,8 +70,6 @@ void rom_init_programs()
     pio_sm_set_consecutive_pindirs(data_pio, sm_data, BASE_DATA_PIN, N_DATA_PINS, true);
 
     // set out/in bases
-
-    // Main program to set data pin dir based on oe&ce
     uint offset_data = pio_add_program(data_pio, &output_program);
     pio_sm_config c_data = output_program_get_default_config(offset_data);
 
@@ -84,22 +78,18 @@ void rom_init_programs()
     pio_sm_init(data_pio, sm_data, offset_data, &c_data);
     pio_sm_set_enabled(data_pio, sm_data, true);
 
-    /*
     // set oe pin directions, data pin direction will be set by the sm
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_OE_PIN, N_OE_PINS, false);
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_BUF_OE_PIN, N_BUF_OE_PINS, true);
 
-    // ce_buf should only be started when RAM is enabled
-    uint offset_oe = pio_add_program(data_pio, &chip_enable_buffer_program);
-    pio_sm_config c_oe = chip_enable_buffer_program_get_default_config(offset_oe);
+    uint offset_oe = pio_add_program(data_pio, &output_enable_buffer_program);
+    pio_sm_config c_oe = output_enable_buffer_program_get_default_config(offset_oe);
     sm_config_set_in_pins(&c_oe, BASE_OE_PIN);
-    sm_config_set_set_pins(&c_oe, BASE_BUF_OE_PIN, 2);
+    sm_config_set_set_pins(&c_oe, BASE_BUF_OE_PIN, N_BUF_OE_PINS);
 
     pio_sm_init(data_pio, sm_oe, offset_oe, &c_oe);
     pio_sm_set_enabled(data_pio, sm_oe, true);
-    */
 
-    // The "Report" program updates the activity LED
     uint offset_report = pio_add_program(data_pio, &output_enable_report_program);
     pio_sm_config c_report = output_enable_report_program_get_default_config(offset_report);
     sm_config_set_in_pins(&c_report, BASE_OE_PIN);

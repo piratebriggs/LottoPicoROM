@@ -10,8 +10,8 @@ start:
     out pindirs, 8
 
 wait1:
-    in null, 30 ; read OE and CE into x (skip 30 pins)
-    in pins, 2 ; (read 2 pins)
+    in null, 30 ; read OE and CE into x
+    in pins, 2
     mov x, isr
     jmp x-- wait1
 
@@ -24,12 +24,19 @@ wait2:
     mov x, isr
     jmp !x wait2
 
-.program chip_enable_buffer
-    in null, 1 ; (skip 1 pin)
+.program output_enable_buffer
 
 .wrap_target
-    in pins, 1  ; Maybe this will read CE () and write to CE_BUF (8)
-    out pins, 1
+start:
+    mov osr, pins
+    out x, 2
+    jmp !x en_out
+
+dis_out:
+    set pins, 1
+    jmp start
+en_out: 
+    set pins, 0
 .wrap
 
 .program output_enable_report
