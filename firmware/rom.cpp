@@ -52,13 +52,13 @@ void rom_init_programs()
     for( uint ofs = 0; ofs < N_OE_PINS; ofs++ )
     {
         pio_gpio_init(data_pio, BASE_OE_PIN + ofs);
-        gpio_set_pulls(BASE_OE_PIN + ofs, true, false);
+        gpio_set_pulls(BASE_OE_PIN + ofs, true, false); // Pull-up
     }
 
-    for( uint ofs = 0; ofs < N_BUF_OE_PINS; ofs++ )
+    for( uint ofs = 0; ofs < N_SRAM_CE_PINS; ofs++ )
     {
-        pio_gpio_init(data_pio, BASE_BUF_OE_PIN + ofs);
-        gpio_set_input_enabled(BASE_BUF_OE_PIN + ofs, false);
+        pio_gpio_init(data_pio, BASE_SRAM_CE_PIN + ofs);
+        gpio_set_input_enabled(BASE_SRAM_CE_PIN + ofs, false);
     }
 
     // set out/in bases
@@ -72,7 +72,7 @@ void rom_init_programs()
 
     // set oe pin directions, data pin direction will be set by the sm
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_OE_PIN, N_OE_PINS, false);
-    pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_BUF_OE_PIN, N_BUF_OE_PINS, true);
+    pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS, true);
 
     uint offset_oe = pio_add_program(data_pio, &output_enable_program);
     pio_sm_config c_oe = output_enable_program_get_default_config(offset_oe);

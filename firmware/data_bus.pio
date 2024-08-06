@@ -4,56 +4,55 @@
 
 
 .program output_enable
+    set y, 0b100    ; pin mask to match (OE Low, CE Low, RomEn High)
 
 start:
     mov osr, null
     out pindirs, 8
 
 wait1:
-    in null, 30 ; read OE and CE into x
-    in pins, 2
-    mov x, isr
-    jmp x-- wait1
+    mov osr, pins
+    out x, 3
+    jmp x!=y wait1  ; wait for pins to match condition
 
     mov osr, ~null ; clear ISR
     out pindirs, 8 ; set the direction of the 8 data pins
 
 wait2:
-    in null, 30 ; read OE and CE into x
-    in pins, 2
-    mov x, isr
-    jmp !x wait2
+    mov osr, pins
+    out x, 3
+    jmp x!=y start ; exit loop when pins no longer match condition
+    jmp wait2
 
 .program output_enable_passthrough
+    set y, 0b10    ; pin mask to match (CE Low, RomEn High)
 
 .wrap_target
 start:
     mov osr, pins
     out x, 2
-    jmp !x en_out
+    jmp x!=y dis_out
 
+en_out:
+    set pins, 0
+    jmp start
 dis_out:
     set pins, 1
-    jmp start
-en_out: 
-    set pins, 0
 .wrap
 
 .program output_enable_report
+    set y, 0b100    ; pin mask to match (OE Low, CE Low, RomEn High)
 
-.wrap_target
 start:
     mov osr, pins
-    out x, 2
-    jmp !x en_out
+    out x, 3
+    jmp x!=y start ; wait for pins to match condition
 
-dis_out:
-    jmp start
 en_out: 
     irq wait 0 rel
 
 wait_clear:
     mov osr, pins
-    out x, 2
-    jmp !x wait_clear
-.wrap
+    out x, 3
+    jmp x!=y start ; exit loop when pins no longer match condition
+    jmp wait_clear

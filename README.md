@@ -24,10 +24,11 @@ My Pinout is something like:
 |pins|func|
 |-|-|
 |0-7|Addr|
-|8|SRAM CE|
-|20|OE (RD_)|
-|21|CE (MEMREQ_)|
-|11-18|Data|
+|8 |SRAM CE_|
+|9 |OE_ (RD_)|
+|10|CE_ (MEMREQ_)|
+|11|ROM EN (Active High)|
+|12-19|Data|
 |25|LED|
 
 
