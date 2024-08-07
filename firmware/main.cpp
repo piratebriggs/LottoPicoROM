@@ -244,12 +244,12 @@ int main()
 
     add_repeating_timer_ms(10, activity_timer_callback, nullptr, &activity_timer);
 
-    // memcpy(rom_get_buffer(), flash_rom_data, ROM_SIZE);
-    memcpy(rom_get_buffer(), LedTest_bin, LedTest_bin_len);
+    memcpy(rom_get_buffer(), flash_rom_data, ROM_SIZE);
+    // memcpy(rom_get_buffer(), LedTest_bin, LedTest_bin_len);
 
     rom_init_programs();
 
-    // comms_init();
+    comms_init();
 
     rom_service_start();
 
