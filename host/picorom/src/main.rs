@@ -28,7 +28,7 @@ fn read_file(name: &Path, rom_size: RomSize) -> Result<Vec<u8>> {
     let diff = rom_size.bytes() - data.len();
     data.extend(iter::repeat(0u8).take(diff));
 
-    Ok(data.repeat(RomSize::MBit(2).bytes() / rom_size.bytes()))
+    Ok(data)
 }
 
 #[derive(Clone, Debug, Copy)]

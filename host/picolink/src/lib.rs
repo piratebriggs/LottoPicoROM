@@ -348,7 +348,8 @@ impl PicoLink {
         })?;
 
         if cur != data.len() as u32 {
-            return Err(anyhow!("Upload did not complete."));
+            return Err(anyhow!("Upload did not complete. Expected '{}' but PicoROM returned '{}'",
+        data.len(), cur));
         }
 
         self.send(ReqPacket::MaskSet(addr_mask))?;
