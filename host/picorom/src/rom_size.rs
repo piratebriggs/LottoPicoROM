@@ -31,7 +31,6 @@ impl ValueEnum for RomSize {
             RomSize::KBit(32),
             RomSize::KBit(16),
             RomSize::KBit(8),
-            RomSize::KBit(4),
         ]
     }
 
