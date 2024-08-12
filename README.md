@@ -16,21 +16,22 @@ It has access to all 29 PIO pins and has the following pin mapping:
 |22-29|Data|
 
 I'm futzing around with a Pi Pico on a breakboard which only has access to 26 PIO pins plus I've got slightly different design goals:
-- The RP2040 should provide 256 bytes of boot rom on reset. This should be enough to load a larger OS (CP/M etc.) from a CH376
+- The RP2040 should provide 4k of boot rom on reset. This should be enough to load a larger OS (CP/M etc.) from a CH376
 - After boot, the RP2040 ROM should not be present on the Z80 bus and instead passthrough the CE signal to a SRAM chip that is wired in parallel.
 
 My Pinout is something like:
 
 |pins|func|
 |-|-|
-|0-7|Addr|
-|8 |SRAM CE_|
-|9 |OE_ (RD_)|
-|10|CE_ (MEMREQ_)|
-|11|ROM EN (Active High)|
+|0-11|Addr|
 |12-19|Data|
+|20|OE_ (RD_)|              
+|21|CE_ (MEMREQ_)|
+|22|ROM EN (Active High)|
 |25|LED|
+|26|SRAM CE_|
 
+*Note: OE, CE & ROM EN must be on contiguous pins*
 
 ## Firmware
 The firmware is written in C/C++ using the [Pico C SDK](https://www.raspberrypi.com/documentation/pico-sdk/). The firmware is responsible for the ROM emulation, managing communication with the host PC and facilitating communication between the host PC and the target device.
