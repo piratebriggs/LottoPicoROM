@@ -15,6 +15,9 @@ wait1:
     out x, 3
     jmp x!=y wait1  ; wait for pins to match condition
 
+    pull            ; Load a 32-bit word from the TX FIFO into the OSR.
+    out pins, 8     ; write D0-D7
+
     mov osr, ~null ; clear ISR
     out pindirs, 8 ; set the direction of the 8 data pins
 
