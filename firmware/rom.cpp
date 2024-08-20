@@ -56,24 +56,24 @@ void rom_init_programs()
         gpio_set_pulls(BASE_OE_PIN + ofs, true, false); // Pull-up
     }
 
-    // for( uint ofs = 0; ofs < N_SRAM_CE_PINS; ofs++ )
-    // {
-    //     pio_gpio_init(data_pio, BASE_SRAM_CE_PIN + ofs);
-    //     gpio_set_input_enabled(BASE_SRAM_CE_PIN + ofs, false);
-    // }
+    for( uint ofs = 0; ofs < N_SRAM_CE_PINS; ofs++ )
+    {
+        pio_gpio_init(data_pio, BASE_SRAM_CE_PIN + ofs);
+        gpio_set_input_enabled(BASE_SRAM_CE_PIN + ofs, false);
+    }
 
     // set out/in bases
-    // uint offset_data = pio_add_program(data_pio, &output_program);
-    // pio_sm_config c_data = output_program_get_default_config(offset_data);
+    uint offset_data = pio_add_program(data_pio, &output_program);
+    pio_sm_config c_data = output_program_get_default_config(offset_data);
 
-    // sm_config_set_out_pins(&c_data, BASE_DATA_PIN, N_DATA_PINS);
-    // sm_config_set_out_shift(&c_data, true, true, N_DATA_PINS);
-    // pio_sm_init(data_pio, sm_data, offset_data, &c_data);
-    // pio_sm_set_enabled(data_pio, sm_data, true);
+    sm_config_set_out_pins(&c_data, BASE_DATA_PIN, N_DATA_PINS);
+    sm_config_set_out_shift(&c_data, true, true, N_DATA_PINS);
+    pio_sm_init(data_pio, sm_data, offset_data, &c_data);
+    pio_sm_set_enabled(data_pio, sm_data, true);
 
     // set oe pin directions, data pin direction will be set by the sm
     pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_OE_PIN, N_OE_PINS, false);
-    // pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS, true);
+    pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS, true);
 
     // program output_enable
     uint offset_oe = pio_add_program(data_pio, &output_enable_program);
@@ -85,14 +85,14 @@ void rom_init_programs()
     pio_sm_set_enabled(data_pio, sm_oe, true);
 
 
-    // // program output_enable_passthrough
-    // uint offset_pt = pio_add_program(data_pio, &output_enable_passthrough_program);
-    // pio_sm_config c_pt = output_enable_program_get_default_config(offset_pt);
-    // sm_config_set_in_pins(&c_pt, BASE_OE_PIN+1);    // CE is 1 higher than OE
-    // sm_config_set_set_pins(&c_pt, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS);
+    // program output_enable_passthrough
+    uint offset_pt = pio_add_program(data_pio, &output_enable_passthrough_program);
+    pio_sm_config c_pt = output_enable_program_get_default_config(offset_pt);
+    sm_config_set_in_pins(&c_pt, BASE_OE_PIN+1);    // CE is 1 higher than OE
+    sm_config_set_set_pins(&c_pt, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS);
 
-    // pio_sm_init(data_pio, sm_pt, offset_pt, &c_pt);
-    // pio_sm_set_enabled(data_pio, sm_pt, true);
+    pio_sm_init(data_pio, sm_pt, offset_pt, &c_pt);
+    pio_sm_set_enabled(data_pio, sm_pt, true);
 
 
     // program output_enable_report
