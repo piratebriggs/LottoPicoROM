@@ -23,12 +23,12 @@ My Pinout is something like:
 
 |pins|func|
 |-|-|
-|0-9|Addr (Only need 0-8)|
+|0-8|Addr|
+|9|IO_WR_|
 |10-17|Data|
 |18-21|Bank Sel|
-|22|IO_WR_|
-|25|LED|
-|26|OE_ (RD_)|              
+|22|LED|
+|26|OE_ (RD_)|
 |27|CE_ (MEMREQ_)|
 |28|ROM EN (Active High)|
 

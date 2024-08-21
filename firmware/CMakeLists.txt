@@ -10,7 +10,6 @@ foreach(TARGET PicoROM)
         main.cpp
         pico_link.cpp
         rom.cpp
-        comms.cpp
     )
 
     pico_set_float_implementation(${TARGET} none)

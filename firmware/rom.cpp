@@ -39,7 +39,7 @@ void rom_init_programs()
 {
     uint sm_data = pio_claim_unused_sm(data_pio, true);
     uint sm_oe = pio_claim_unused_sm(data_pio, true);
-    uint sm_pt = pio_claim_unused_sm(data_pio, true);
+    uint sm_bnk = pio_claim_unused_sm(data_pio, true);
     
     sm_report = pio_claim_unused_sm(data_pio, true);
 
@@ -47,7 +47,7 @@ void rom_init_programs()
     for( uint ofs = 0; ofs < N_DATA_PINS; ofs++ )
     {
         pio_gpio_init(data_pio, BASE_DATA_PIN + ofs);
-        gpio_set_input_enabled(BASE_DATA_PIN + ofs, false);
+        gpio_set_input_enabled(BASE_DATA_PIN + ofs, true);
     }
 
     for( uint ofs = 0; ofs < N_BNKSEL_PINS; ofs++ )
@@ -65,7 +65,7 @@ void rom_init_programs()
     for( uint ofs = 0; ofs < N_IO_WR_PINS; ofs++ )
     {
         pio_gpio_init(data_pio, BASE_IO_WR_PIN + ofs);
-        gpio_set_input_enabled(BASE_IO_WR_PIN + ofs, false);
+        gpio_set_pulls(BASE_IO_WR_PIN + ofs, true, false); // Pull-up
     }
 
     // set out/in bases
@@ -90,16 +90,20 @@ void rom_init_programs()
     pio_sm_set_enabled(data_pio, sm_oe, true);
 
 
-    // program output_enable_passthrough
-    // pio_sm_set_consecutive_pindirs(data_pio, sm_oe, BASE_IO_WR_PIN, N_IO_WR_PINS, true);
+    // program io_write
+    pio_sm_set_consecutive_pindirs(data_pio, sm_bnk, BASE_IO_WR_PIN, N_IO_WR_PINS, false);
+    pio_sm_set_consecutive_pindirs(data_pio, sm_bnk, BASE_DATA_PIN, N_DATA_PINS, false);
+    pio_sm_set_consecutive_pindirs(data_pio, sm_bnk, BASE_BNKSEL_PIN, N_BNKSEL_PINS, true);
 
-    // uint offset_pt = pio_add_program(data_pio, &output_enable_passthrough_program);
-    // pio_sm_config c_pt = output_enable_program_get_default_config(offset_pt);
-    // sm_config_set_in_pins(&c_pt, BASE_OE_PIN+1);    // CE is 1 higher than OE
-    // sm_config_set_set_pins(&c_pt, BASE_SRAM_CE_PIN, N_SRAM_CE_PINS);
+    uint offset_bnk = pio_add_program(data_pio, &io_write_program);
+    pio_sm_config c_bnk = output_enable_program_get_default_config(offset_bnk);
+    sm_config_set_in_pins(&c_bnk, 0);    // all the pins!
+    sm_config_set_out_pins(&c_bnk, BASE_BNKSEL_PIN, N_BNKSEL_PINS);
+    // sm_config_set_set_pins(&c_bnk, BASE_BNKSEL_PIN, N_BNKSEL_PINS);
 
-    // pio_sm_init(data_pio, sm_pt, offset_pt, &c_pt);
-    // pio_sm_set_enabled(data_pio, sm_pt, true);
+    pio_sm_init(data_pio, sm_bnk, offset_bnk, &c_bnk);
+    pio_sm_set_enabled(data_pio, sm_bnk, true);
+    pio_sm_put_blocking(data_pio, sm_bnk, 0x64); // bit pattern to match
 
 
     // program output_enable_report

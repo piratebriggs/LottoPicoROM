@@ -1,4 +1,3 @@
-
 .program output
     out pins, 8
 
@@ -18,27 +17,34 @@ wait1:
     mov osr, ~null ; clear ISR
     out pindirs, 8 ; set the direction of the 8 data pins
 
-wait2:
+.wrap_target 
     mov osr, pins
     out x, 3
     jmp x!=y start ; exit loop when pins no longer match condition
-    jmp wait2
-
-.program output_enable_passthrough
-
-.wrap_target
-start:
-    mov osr, pins
-    out x, 2
-    jmp !x en_out ; if ROM_EN = low and CE = Low, set SRAM_CE low
-
-dis_out:
-    set pins, 1
-    jmp start
-en_out:
-    set pins, 0
-    jmp start
 .wrap
+
+.program io_write
+    ; initialize y from fifo
+    pull block
+    mov y, osr
+
+start:
+    ; loop until upper address bits matches mask 
+    mov osr, pins
+    out x, 10 ; a0-a8, io_wr
+    jmp x!=y start
+
+    mov osr, pins
+    out null, 10
+    out pins, 4
+
+    ; loop until address doesn't match mask
+.wrap_target 
+    mov osr, pins
+    out x, 10 ; a0-a8, io_wr
+    jmp x!=y start
+.wrap
+
 
 .program output_enable_report
     set y, 0b100    ; pin mask to match (OE Low, CE Low, RomEn High)
@@ -51,8 +57,8 @@ start:
 en_out: 
     irq wait 0 rel
 
-wait_clear:
+.wrap_target 
     mov osr, pins
     out x, 3
     jmp x!=y start ; exit loop when pins no longer match condition
-    jmp wait_clear
+.wrap

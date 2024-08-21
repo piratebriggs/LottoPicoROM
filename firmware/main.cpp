@@ -12,7 +12,7 @@
 #include "system.h"
 #include "pico_link.h"
 #include "rom.h"
-#include "comms.h"
+// #include "comms.h"
 
 #if TCA_EXPANDER
 bi_decl(bi_program_feature("Reset"));
@@ -26,20 +26,6 @@ static constexpr uint CONFIG_VERSION = 0x00010007;
 uint32_t rom_offset = 0;
 const uint8_t *flash_rom_data = (uint8_t *)(XIP_BASE + FLASH_ROM_OFFSET);
 
-uint8_t LedTest_bin[] = {
-  0xf3, 0x31, 0xff, 0xff, 0x3e, 0x80, 0xd3, 0x77, 0x3e, 0x10, 0xd3, 0x75,
-  0x01, 0x66, 0x66, 0xcd, 0x5b, 0x00, 0x3e, 0x00, 0xd3, 0x75, 0x01, 0xff,
-  0xff, 0xcd, 0x5b, 0x00, 0x3e, 0x10, 0xd3, 0x75, 0x01, 0x66, 0x66, 0xcd,
-  0x5b, 0x00, 0x3e, 0x00, 0xd3, 0x75, 0x01, 0xff, 0xff, 0xcd, 0x5b, 0x00,
-  0xdb, 0x61, 0xd3, 0x75, 0x01, 0xff, 0xff, 0xcd, 0x5b, 0x00, 0x3e, 0x10,
-  0xd3, 0x75, 0x01, 0x66, 0x66, 0xcd, 0x5b, 0x00, 0x3e, 0x00, 0xd3, 0x75,
-  0x01, 0xff, 0xff, 0xcd, 0x5b, 0x00, 0xdb, 0x63, 0xd3, 0x75, 0x01, 0xff,
-  0xff, 0xcd, 0x5b, 0x00, 0xc3, 0x08, 0x00, 0x00, 0x0b, 0x78, 0xb1, 0x20,
-  0xfa, 0xc9, 0x76, 0x5a, 0x38, 0x30, 0x2d, 0x4c, 0x6f, 0x74, 0x74, 0x65,
-  0x72, 0x79, 0x00
-};
-uint16_t LedTest_bin_len = 111;
-
 struct Config
 {
     uint32_t version;
@@ -51,7 +37,6 @@ struct Config
 Config config;
 const Config *flash_config = (Config *)(XIP_BASE + FLASH_CFG_OFFSET);
 static_assert(sizeof(Config) <= FLASH_PAGE_SIZE);
-
 
 
 void save_config()
@@ -231,7 +216,7 @@ int main()
     init_config();
 
     set_sys_clock_khz(200000, true);
-
+    
     configure_address_pins(config.addr_mask);
 
     identify_ack = identify_request = 0;
@@ -249,15 +234,12 @@ int main()
 
     rom_init_programs();
 
-    comms_init();
-
     rom_service_start();
 
     while (true)
     {
         // Reset state
         rom_offset = 0;
-        comms_end_session();
 
         pl_wait_for_connection();
 
@@ -267,10 +249,10 @@ int main()
         while (pl_is_connected())
         {
             uint32_t addr = sio_hw->gpio_in & config.addr_mask;
-            if( !comms_update(nullptr, 0, 5000) )
-            {
-                pl_send_error("Comms Update Timeout", 0, 0);
-            }
+            // if( !comms_update(nullptr, 0, 5000) )
+            // {
+            //     pl_send_error("Comms Update Timeout", 0, 0);
+            // }
 
             const Packet *req = pl_poll();
 
@@ -337,24 +319,24 @@ int main()
                     {
                         uint32_t addr;
                         memcpy(&addr, req->payload, 4);
-                        comms_begin_session(addr, rom_get_buffer());
+                        // comms_begin_session(addr, rom_get_buffer());
                         pl_send_debug("Comms Started", addr, 0);
                         break;
                     }
 
                     case PacketType::CommsEnd:
                     {
-                        comms_end_session();
+                        // comms_end_session();
                         pl_send_debug("Comms Ended", 0, 0);
                         break;
                     }
 
                     case PacketType::CommsData:
                     {
-                        if( !comms_update(req->payload, req->size, 5000) )
-                        {
-                            pl_send_error("Comms send timeout", 0, 0);
-                        }
+                        // if( !comms_update(req->payload, req->size, 5000) )
+                        // {
+                        //     pl_send_error("Comms send timeout", 0, 0);
+                        // }
                         break;
                     }
 
