@@ -14,6 +14,9 @@
 #include "rom.h"
 // #include "comms.h"
 
+// Our assembled program:
+#include "squarewave.pio.h"
+
 #if TCA_EXPANDER
 bi_decl(bi_program_feature("Reset"));
 #endif
@@ -209,6 +212,27 @@ bool activity_timer_callback(repeating_timer_t * /*unused*/)
 }
 #endif // TCA_EXPANDER
 
+static PIO clk_pio = pio1;
+
+void clk_init_programs()
+{
+    uint sm_clk = pio_claim_unused_sm(clk_pio, true);
+
+
+    pio_gpio_init(clk_pio, CLK_OUT_PIN);
+    gpio_set_input_enabled(CLK_OUT_PIN, false);
+
+    uint offset_clk = pio_add_program(clk_pio, &squarewave_program);
+    pio_sm_set_consecutive_pindirs(clk_pio, sm_clk, CLK_OUT_PIN, N_CLK_PINS, true);
+    pio_sm_config c_clk = squarewave_program_get_default_config(offset_clk);
+
+    sm_config_set_set_pins(&c_clk, CLK_OUT_PIN, N_CLK_PINS);
+    pio_sm_init(clk_pio, sm_clk, offset_clk, &c_clk);
+    pio_sm_set_clkdiv_int_frac(clk_pio, sm_clk, 1000, 0);  // 200khz
+    pio_sm_set_enabled(clk_pio, sm_clk, true);
+}
+
+
 int main()
 {
     tusb_init();
@@ -233,6 +257,8 @@ int main()
     // memcpy(rom_get_buffer(), LedTest_bin, LedTest_bin_len);
 
     rom_init_programs();
+
+    clk_init_programs();
 
     rom_service_start();
 

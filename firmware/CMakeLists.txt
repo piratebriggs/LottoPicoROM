@@ -16,7 +16,7 @@ foreach(TARGET PicoROM)
     pico_set_double_implementation(${TARGET} none)
 
     pico_generate_pio_header(${TARGET} ${CMAKE_CURRENT_LIST_DIR}/data_bus.pio)
-    pico_generate_pio_header(${TARGET} ${CMAKE_CURRENT_LIST_DIR}/comms.pio)
+    pico_generate_pio_header(${TARGET} ${CMAKE_CURRENT_LIST_DIR}/squarewave.pio)
 
     pico_enable_stdio_usb(${TARGET} 1)
     pico_enable_stdio_uart(${TARGET} 0)
