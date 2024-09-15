@@ -21,6 +21,8 @@ I'm futzing around with a Pi Pico on a breakboard which only has access to 26 PI
 
 My Pinout is something like:
 
+
+## LottoPico
 |pins|func|
 |-|-|
 |0-8|Addr|
@@ -32,8 +34,31 @@ My Pinout is something like:
 |27|CE_ (MEMREQ_)|
 |28|ROM EN (Active High)|
 
-
 *Note: OE, CE & ROM EN must be on contiguous pins*
+
+## RC2014Pico
+|pins|func|
+|-|-|
+|0-8|Addr|
+|9|IO_WR_ (WR_+IOREQ_)|
+|10-17|Data|
+|18-21|Bank Sel|
+|22|RESET_|
+|25|LED|
+|26|OE_ (RD_)|
+|27|CE_ (MEMREQ_)|
+|28|ROM EN (Active High)|
+
+
+SRAM_CE_ = MREQ_=0 + A15=0 + ROM_EN_=0
+
+PICO_CE_ = (MREQ_=0 + A15=0), RD_=0, ROM_EN_=1
+PICO_IO_WR_ = (WR_=0 + IOREQ_=0), a4=0, a2=1
+
+CH_CE_ = a4=1, a2=0
+
+(SIO_CE_ = a4=0, a2=0)
+(PIO_CE = a4=1, a2=1)
 
 ## Firmware
 The firmware is written in C/C++ using the [Pico C SDK](https://www.raspberrypi.com/documentation/pico-sdk/). The firmware is responsible for the ROM emulation, managing communication with the host PC and facilitating communication between the host PC and the target device.

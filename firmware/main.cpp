@@ -14,6 +14,9 @@
 #include "rom.h"
 // #include "comms.h"
 
+// Our assembled program:
+#include "mmu.pio.h"
+
 #if TCA_EXPANDER
 bi_decl(bi_program_feature("Reset"));
 #endif
@@ -209,6 +212,56 @@ bool activity_timer_callback(repeating_timer_t * /*unused*/)
 }
 #endif // TCA_EXPANDER
 
+static PIO mmu_pio = pio1;
+
+void mmu_init_programs()
+{
+    uint sm_rst = pio_claim_unused_sm(mmu_pio, true);
+    uint sm_bnk = pio_claim_unused_sm(mmu_pio, true);
+
+    for( uint ofs = 0; ofs < N_BNKSEL_PINS; ofs++ )
+    {
+        pio_gpio_init(mmu_pio, BASE_BNKSEL_PIN + ofs);
+        gpio_set_input_enabled(BASE_BNKSEL_PIN + ofs, false);
+    }
+
+    for( uint ofs = 0; ofs < N_IO_WR_PINS; ofs++ )
+    {
+        pio_gpio_init(mmu_pio, BASE_IO_WR_PIN + ofs);
+        gpio_set_pulls(BASE_IO_WR_PIN + ofs, true, false); // Pull-up
+    }
+
+    pio_gpio_init(mmu_pio, ROM_EN_PIN);
+
+    // program rst_detect
+    uint offset_rst = pio_add_program(mmu_pio, &rst_detect_program);
+    pio_sm_config c_rst = rst_detect_program_get_default_config(offset_rst);
+    pio_sm_set_consecutive_pindirs(mmu_pio, sm_rst, ROM_EN_PIN, 1, true);
+
+    sm_config_set_in_pins(&c_rst, RESET_PIN);
+    sm_config_set_set_pins(&c_rst, ROM_EN_PIN, 1);
+    pio_sm_init(mmu_pio, sm_rst, offset_rst, &c_rst);
+    pio_sm_set_enabled(mmu_pio, sm_rst, true);
+
+    // program io_write
+    pio_sm_set_consecutive_pindirs(mmu_pio, sm_bnk, BASE_IO_WR_PIN, N_IO_WR_PINS, false);
+    pio_sm_set_consecutive_pindirs(mmu_pio, sm_bnk, BASE_DATA_PIN, N_DATA_PINS, false);
+    pio_sm_set_consecutive_pindirs(mmu_pio, sm_bnk, BASE_BNKSEL_PIN, N_BNKSEL_PINS, true);
+    pio_sm_set_consecutive_pindirs(mmu_pio, sm_bnk, ROM_EN_PIN, 1, true);
+
+    uint offset_bnk = pio_add_program(mmu_pio, &io_write_program);
+    pio_sm_config c_bnk = io_write_program_get_default_config(offset_bnk);
+    sm_config_set_in_pins(&c_bnk, 0);    // all the pins!
+    sm_config_set_out_pins(&c_bnk, BASE_BNKSEL_PIN, N_BNKSEL_PINS);
+    sm_config_set_set_pins(&c_bnk, ROM_EN_PIN, 1);
+
+    pio_sm_init(mmu_pio, sm_bnk, offset_bnk, &c_bnk);
+    pio_sm_set_enabled(mmu_pio, sm_bnk, true);
+    pio_sm_put_blocking(mmu_pio, sm_bnk, 0x64); // bit pattern to match
+
+}
+
+
 int main()
 {
     tusb_init();
@@ -233,6 +286,8 @@ int main()
     // memcpy(rom_get_buffer(), LedTest_bin, LedTest_bin_len);
 
     rom_init_programs();
+
+    mmu_init_programs();
 
     rom_service_start();
 

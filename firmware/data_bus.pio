@@ -23,28 +23,6 @@ wait1:
     jmp x!=y start ; exit loop when pins no longer match condition
 .wrap
 
-.program io_write
-    ; initialize y from fifo
-    pull block
-    mov y, osr
-
-start:
-    ; loop until upper address bits matches mask 
-    mov osr, pins
-    out x, 10 ; a0-a8, io_wr
-    jmp x!=y start
-
-    mov osr, pins
-    out null, 10
-    out pins, 4
-
-    ; loop until address doesn't match mask
-.wrap_target 
-    mov osr, pins
-    out x, 10 ; a0-a8, io_wr
-    jmp x!=y start
-.wrap
-
 
 .program output_enable_report
     set y, 0b100    ; pin mask to match (OE Low, CE Low, RomEn High)
