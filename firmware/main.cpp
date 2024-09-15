@@ -228,7 +228,7 @@ void clk_init_programs()
 
     sm_config_set_set_pins(&c_clk, CLK_OUT_PIN, N_CLK_PINS);
     pio_sm_init(clk_pio, sm_clk, offset_clk, &c_clk);
-    pio_sm_set_clkdiv_int_frac(clk_pio, sm_clk, 1000, 0);  // 200khz
+    pio_sm_set_clkdiv_int_frac(clk_pio, sm_clk, 12, 128);  // 200,000,000/12.5/4cycles = 4Mhz
     pio_sm_set_enabled(clk_pio, sm_clk, true);
 }
 
