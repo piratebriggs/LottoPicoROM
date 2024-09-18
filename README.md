@@ -60,6 +60,30 @@ CH_CE_ = a4=1, a2=0
 (SIO_CE_ = a4=0, a2=0)
 (PIO_CE = a4=1, a2=1)
 
+##74HC32
+|pin|func|pin|func|
+|-|-|-|-|
+|1|1a < A15|14|vcc|
+|2|1b < MREQ_|13|4B < WR_|
+|3|1Y > Pico_CE_|12|4A < IOREQ_|
+|4|2A < 1Y|11|4Y > IO_WR_|
+|5|2B < RomEn|10|3B < RD_|
+|6|2Y > SRAM_CE_|9|3A < IO_REQ_|
+|7|GND|8|3Y > IO_RD_ |
+
+##74HC138
+|pin|func|pin|func|
+|-|-|-|-|
+|1|AO < A2|16|vcc|
+|2|A1 < A4|15|Y0|
+|3|A3 = GND|14|Y1|
+|4|E1_ < IOREQ|13|Y2 = CH_CE_|
+|5|E2_ < IOREQ|12|Y3|
+|6|E3 = vcc|11|Y4|
+|7|Y7|10|Y5|
+|8|GND|9|Y6|
+
+
 ## Firmware
 The firmware is written in C/C++ using the [Pico C SDK](https://www.raspberrypi.com/documentation/pico-sdk/). The firmware is responsible for the ROM emulation, managing communication with the host PC and facilitating communication between the host PC and the target device.
 
