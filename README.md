@@ -55,7 +55,8 @@ SRAM_CE_ = MREQ_=0 + A15=0 + ROM_EN_=0
 PICO_CE_ = (MREQ_=0 + A15=0), RD_=0, ROM_EN_=1
 PICO_IO_WR_ = (WR_=0 + IOREQ_=0), a4=0, a2=1
 
-CH_CE_ = a4=1, a2=0
+CH_CE_ = a4=1, a2=0, a1 = 0
+TMS_CE_ = a4=1, a2=0, a1 = 1
 
 (SIO_CE_ = a4=0, a2=0)
 (PIO_CE = a4=1, a2=1)
